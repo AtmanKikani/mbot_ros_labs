@@ -1,4 +1,5 @@
 #include "controllers/rtr_controller.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <algorithm>  // std::clamp
 
 void RTRController::setPlan(const std::vector<geometry_msgs::msg::Pose2D>& waypoints,
@@ -77,6 +78,7 @@ void RTRController::loadNextGoal()
         goal_y_     = goal_queue_.front().y;
         goal_theta_ = goal_queue_.front().theta;
         goal_queue_.erase(goal_queue_.begin());
+        RCLCPP_INFO(rclcpp::get_logger("rtr_controller"), "Moving to next goal at %.2f %.2f", goal_x_, goal_y_);
     } else {
         goal_received_ = false;
     }
