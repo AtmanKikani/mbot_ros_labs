@@ -38,7 +38,7 @@ public:
 
         // Publishers
         waypoints_pub_ = this->create_publisher<mbot_interfaces::msg::Pose2DArray>(
-            "/waypoints", 10);
+            "/waypoints", rclcpp::QoS(1).transient_local());
 
         path_pub_ = this->create_publisher<nav_msgs::msg::Path>(
             "/planned_path", 10);

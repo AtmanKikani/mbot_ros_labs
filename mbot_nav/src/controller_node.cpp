@@ -40,7 +40,7 @@ public:
         }
 
         waypoints_sub_ = create_subscription<mbot_interfaces::msg::Pose2DArray>(
-            "/waypoints", 10,
+            "/waypoints", rclcpp::QoS(1).transient_local(),
             [this](const mbot_interfaces::msg::Pose2DArray::SharedPtr msg) {
                 controller_.setPlan(msg->poses, current_x_, current_y_);
                 RCLCPP_INFO(get_logger(), "Received %zu waypoints", msg->poses.size());

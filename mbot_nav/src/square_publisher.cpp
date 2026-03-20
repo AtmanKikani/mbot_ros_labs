@@ -6,28 +6,23 @@
 class SquarePublisher : public rclcpp::Node {
 public:
     SquarePublisher() : Node("square_publisher") {
-        pub_ = this->create_publisher<mbot_interfaces::msg::Pose2DArray>("/waypoints", 10);
+        pub_ = this->create_publisher<mbot_interfaces::msg::Pose2DArray>(
+            "/waypoints", rclcpp::QoS(1).transient_local());
 
-        // Republish every second so late-connecting subscribers always receive the waypoints
-        timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(1000),
-            [this]() {
-                mbot_interfaces::msg::Pose2DArray goal_array;
-                goal_array.poses = {
-                    pose(1.0, 0.0, 0.0),
-                    pose(1.0, 1.0, M_PI_2),
-                    pose(0.0, 1.0, M_PI),
-                    pose(0.0, 0.0, 0.0)
-                };
-
-                pub_->publish(goal_array);
-                RCLCPP_INFO(this->get_logger(), "Published square trajectory with %zu poses.", goal_array.poses.size());
-            });
+        // Publish once — transient_local QoS delivers the cached message to any late-connecting subscriber
+        mbot_interfaces::msg::Pose2DArray goal_array;
+        goal_array.poses = {
+            pose(1.0, 0.0, 0.0),
+            pose(1.0, 1.0, M_PI_2),
+            pose(0.0, 1.0, M_PI),
+            pose(0.0, 0.0, 0.0)
+        };
+        pub_->publish(goal_array);
+        RCLCPP_INFO(this->get_logger(), "Published square trajectory with %zu poses.", goal_array.poses.size());
     }
 
 private:
     rclcpp::Publisher<mbot_interfaces::msg::Pose2DArray>::SharedPtr pub_;
-    rclcpp::TimerBase::SharedPtr timer_;
 
     static geometry_msgs::msg::Pose2D pose(double x, double y, double theta) {
         geometry_msgs::msg::Pose2D p;
