@@ -10,15 +10,18 @@ public:
             "/waypoints", rclcpp::QoS(1).transient_local());
 
         // Publish once — transient_local QoS delivers the cached message to any late-connecting subscriber
+        const int loops = this->declare_parameter<int>("loops", 1);
+        const double side = this->declare_parameter<double>("side", 1.0);
+
         mbot_interfaces::msg::Pose2DArray goal_array;
-        goal_array.poses = {
-            pose(1.0, 0.0, 0.0),
-            pose(1.0, 1.0, M_PI_2),
-            pose(0.0, 1.0, M_PI),
-            pose(0.0, 0.0, 0.0)
-        };
+        for (int i = 0; i < loops; ++i) {
+            goal_array.poses.push_back(pose(side, 0.0, 0.0));
+            goal_array.poses.push_back(pose(side, side, M_PI_2));
+            goal_array.poses.push_back(pose(0.0, side, M_PI));
+            goal_array.poses.push_back(pose(0.0, 0.0, 0.0));
+        }
         pub_->publish(goal_array);
-        RCLCPP_INFO(this->get_logger(), "Published square trajectory with %zu poses.", goal_array.poses.size());
+        RCLCPP_INFO(this->get_logger(), "Published square trajectory (%d loops) with %zu poses.", loops, goal_array.poses.size());
     }
 
 private:

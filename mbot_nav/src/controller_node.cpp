@@ -24,6 +24,22 @@ public:
         this->declare_parameter<bool>("use_localization", false);
         use_localization_ = this->get_parameter("use_localization").as_bool();
 
+        // Speed limits (RTRController only - remove if you switch controllers)
+        double max_lin = this->declare_parameter<double>("max_linear_vel", 0.3);
+        double max_ang = this->declare_parameter<double>("max_angular_vel", 1.0);
+        double kp_lin  = this->declare_parameter<double>("kp_linear", 1.0);
+        double kp_ang  = this->declare_parameter<double>("kp_angular", 2.0);
+        double acc_lin = this->declare_parameter<double>("max_linear_accel", 0.6);
+        double acc_ang = this->declare_parameter<double>("max_angular_accel", 3.0);
+        double dec_lin = this->declare_parameter<double>("max_linear_decel", acc_lin);
+        double dec_ang = this->declare_parameter<double>("max_angular_decel", acc_ang);
+        controller_.setDecel(dec_lin, dec_ang);
+        controller_.setLimits(max_lin, max_ang);
+        controller_.setGains(kp_lin, kp_ang);
+        controller_.setAccel(acc_lin, acc_ang);
+        RCLCPP_INFO(get_logger(), "Limits: %.2f m/s, %.2f rad/s | Kp lin %.2f ang %.2f | accel %.2f m/s^2, %.2f rad/s^2 | decel %.2f m/s^2, %.2f rad/s^2",
+                    max_lin, max_ang, kp_lin, kp_ang, acc_lin, acc_ang, dec_lin, dec_ang);
+
         if (use_localization_) {
             RCLCPP_INFO(get_logger(), "Using LOCALIZATION mode (TF map->base_footprint)");
             tf_buffer_   = std::make_shared<tf2_ros::Buffer>(this->get_clock());
